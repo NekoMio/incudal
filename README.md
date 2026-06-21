@@ -31,61 +31,58 @@ scripts/                本地开发和检查脚本
 
 ## 搭建教程
 
-当前无论使用哪种部署方式，都需要在 `server/certs` 目录下生成或放置证书与密钥，并确保 Docker 容器具有读取权限。
-
-### 方式一：Docker Compose 开发环境
-
-适合本地试跑和开发预览。该方式会自动启动 Node、PostgreSQL 和 Redis，并自动安装依赖、执行数据库迁移。
+使用根目录的 `docker-compose.yml` 部署。Compose 会启动面板、PostgreSQL 和 Redis，并在容器启动时自动执行数据库迁移。
 
 ```bash
 git clone https://github.com/qwer-xyz/incudal.git
 cd incudal
-docker compose -f docker-compose.dev.yml up
+cp .env.example .env
 ```
 
-启动后访问：
+编辑 `.env`，至少修改以下配置：
 
-```text
-前端：http://127.0.0.1:43173
-后端：http://127.0.0.1:8888
+```env
+POSTGRES_PASSWORD=your_strong_database_password
+REDIS_PASSWORD=your_strong_redis_password
+JWT_SECRET=your_mixed_64_char_secret
+COOKIE_SECRET=another_random_secret
+ENCRYPTION_KEY=your_base64_32_byte_encryption_key
+ADMIN_PASSWORD=your_admin_password
+FRONTEND_URL=https://your-domain.example
+APP_PORT=3000
 ```
+
+`ENCRYPTION_KEY` 需要是 32 字节随机值的 Base64 编码，可用下面的命令生成：
+
+```bash
+openssl rand -base64 32
+```
+
+<strong>当前无论使用哪种部署方式，都需要在 `server/certs` 目录下生成或放置证书与密钥，并确保 Docker 容器具有读取权限。</strong>
+
+配置完成后启动：
+
+```bash
+docker compose up -d --build
+```
+
+<strong>启动后请使用 Nginx、Caddy、OpenResty 等反向代理将你的域名转发到 `127.0.0.1:${APP_PORT}`，并在反向代理层配置 HTTPS。</strong>
+
+`APP_PORT` 默认是 `3000`，如果你在 `.env` 中修改了该端口，反向代理目标端口也需要同步修改。
 
 停止服务：
 
 ```bash
-docker compose -f docker-compose.dev.yml down
+docker compose down
 ```
 
-如需同时删除本地开发数据库卷：
+如需同时删除数据库和 Redis 数据卷：
 
 ```bash
-docker compose -f docker-compose.dev.yml down -v
+docker compose down -v
 ```
 
-### 方式二：生产镜像部署
-
-生产环境建议准备独立 PostgreSQL 和 Redis，然后构建并运行镜像。
-
-```bash
-docker build -t incudal:local .
-docker run -d --name incudal \
-  -p 3000:3000 \
-  --env-file .env \
-  incudal:local
-```
-
-生产环境至少需要配置：
-
-```env
-NODE_ENV=production
-PORT=3000
-DATABASE_URL=postgresql://user:password@postgres:5432/incudal
-REDIS_URL=redis://redis:6379
-JWT_SECRET=please-change-to-a-long-random-secret
-FRONTEND_URL=https://your-domain.example
-```
-
-容器启动时会执行 `prisma migrate deploy`，然后启动后端服务。生产部署前请确保数据库可连接、`JWT_SECRET` 足够随机、反向代理和 HTTPS 已配置好。
+容器启动时会执行 `prisma migrate deploy`，然后启动后端服务。
 
 Agent 正式二进制不存放在面板仓库内，面板运行时会从 GitHub Release 查询和代理下载。如部署在私有仓库或 fork，可按需配置：
 

@@ -9,7 +9,7 @@
       - NODE_ENV=development
       - HOST=0.0.0.0
       - PORT=8888
-      - FRONTEND_URL=${FRONTEND_URL:-https://idev.bitpd.com}
+      - FRONTEND_URL=${FRONTEND_URL:-}
       - DATABASE_URL=postgresql://incudal:incudal_dev_password@db:5432/incudal
       - REDIS_URL=redis://redis:6379
       - CHOKIDAR_USEPOLLING=true

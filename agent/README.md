@@ -15,7 +15,7 @@
 示例：
 
 ```yaml
-panel_url: "https://idev.bitpd.com"
+panel_url: "https://panel.example.com"
 agent_id: "agt_xxx"
 agent_secret: "ias_xxx"
 heartbeat_interval_seconds: 30

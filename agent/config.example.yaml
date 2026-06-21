@@ -1,7 +1,7 @@
 # Incudal Host Agent minimal config.
 # 首版仅支持简单 key: value 格式，不支持嵌套 YAML。
 
-panel_url: "https://idev.bitpd.com"
+panel_url: "https://panel.example.com"
 agent_id: "agt_replace_me"
 agent_secret: "ias_replace_me"
 heartbeat_interval_seconds: 30
